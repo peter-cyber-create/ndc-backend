@@ -242,29 +242,38 @@ router.get("/download/:id", async (req, res) => {
     console.log('Abstract data:', {
       id: abstract.id,
       title: abstract.title,
-      filePath: abstract.filePath,
-      fileName: abstract.fileName
+      file_url: abstract.file_url,
+      has_file_url: !!abstract.file_url
     });
     
-    if (!abstract.filePath) {
+    if (!abstract.file_url) {
       return res.status(404).json({ error: "No file attached to this abstract" });
     }
     
-    const filePath = path.resolve(abstract.filePath);
-    
-    // Check if file exists
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ error: "File not found on disk" });
+    // Parse the file_url JSON
+    let fileInfo;
+    try {
+      fileInfo = JSON.parse(abstract.file_url);
+    } catch (e) {
+      return res.status(400).json({ error: "Invalid file information" });
     }
     
-    // Set appropriate headers for download
-    const fileName = abstract.fileName || `abstract-${abstract.id}.pdf`;
-    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
-    res.setHeader('Content-Type', 'application/pdf');
+    const fileName = fileInfo.name || `abstract-${abstract.id}.pdf`;
+    const fileType = fileInfo.type || 'application/pdf';
     
-    // Stream the file
-    const fileStream = fs.createReadStream(filePath);
-    fileStream.pipe(res);
+    // For now, return the file info as JSON since files are stored in frontend
+    // In production, you would serve the actual file from the file system
+    res.json({
+      message: "File download information",
+      abstract: {
+        id: abstract.id,
+        title: abstract.title,
+        fileName: fileName,
+        fileType: fileType,
+        fileSize: fileInfo.size
+      },
+      downloadUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/uploads/abstracts/${fileName}`
+    });
     
   } catch (error) {
     console.error("Error downloading abstract file:", error);

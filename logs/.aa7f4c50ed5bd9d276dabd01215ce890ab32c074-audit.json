@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": false,
+        "amount": 14
+    },
+    "auditLog": "/home/peter/Desktop/dev/ntlp/ntlp-backend/logs/.aa7f4c50ed5bd9d276dabd01215ce890ab32c074-audit.json",
+    "files": [
+        {
+            "date": 1756871520902,
+            "name": "/home/peter/Desktop/dev/ntlp/ntlp-backend/logs/exceptions-2025-09-03.log",
+            "hash": "003edc7d78157623099aea40b93baa20d2e183487e286988f69c4c79d3e3454d"
+        }
+    ],
+    "hashType": "sha256"
+}

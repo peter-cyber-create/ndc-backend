@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": false,
+        "amount": 14
+    },
+    "auditLog": "/home/peter/Desktop/dev/ntlp/ndc-backend/logs/.dedcde2bd67e6a1773ec3e8fd2f5c09525361ccb-audit.json",
+    "files": [
+        {
+            "date": 1756875329012,
+            "name": "/home/peter/Desktop/dev/ntlp/ndc-backend/logs/http-2025-09-03.log",
+            "hash": "3701027270c597b3ccf113d462b8eda7142e9cbb611fdaff039f72aeb8bdfd42"
+        }
+    ],
+    "hashType": "sha256"
+}

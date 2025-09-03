@@ -48,9 +48,24 @@ app.set('trust proxy', 1);
 // CORS configuration
 const corsOptions = {
   origin: function (origin, callback) {
-    const allowedOrigins = process.env.ALLOWED_ORIGINS 
-      ? process.env.ALLOWED_ORIGINS.split(',') 
-      : [process.env.FRONTEND_URL || 'http://localhost:3000'];
+    // For development, allow localhost origins
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+      'http://localhost:3001',
+      'http://127.0.0.1:3001'
+    ];
+    
+    // Add environment-based origins if they exist
+    if (process.env.ALLOWED_ORIGINS) {
+      allowedOrigins.push(...process.env.ALLOWED_ORIGINS.split(','));
+    }
+    if (process.env.FRONTEND_URL && !allowedOrigins.includes(process.env.FRONTEND_URL)) {
+      allowedOrigins.push(process.env.FRONTEND_URL);
+    }
+    
+    logger.info(`CORS allowed origins: ${allowedOrigins.join(', ')}`);
+    logger.info(`CORS request origin: ${origin}`);
     
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);

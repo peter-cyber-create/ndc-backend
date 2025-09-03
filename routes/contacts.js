@@ -44,7 +44,7 @@ router.get('/', async (req, res) => {
         const statsQuery = `
             SELECT 
                 COUNT(*) as total,
-                COUNT(CASE WHEN status = 'new' THEN 1 END) as pending,
+                COUNT(CASE WHEN status = 'submitted' THEN 1 END) as pending,
                 COUNT(CASE WHEN status = 'responded' THEN 1 END) as responded,
                 COUNT(CASE WHEN created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) THEN 1 END) as this_week
             FROM contacts
@@ -83,7 +83,7 @@ router.post('/', validateContact, async (req, res) => {
         const { name, email, subject, message } = req.body;
         const query = `
             INSERT INTO contacts (name, email, subject, message, status, created_at, updated_at)
-            VALUES (?, ?, ?, ?, 'new', NOW(), NOW())
+            VALUES (?, ?, ?, ?, 'submitted', NOW(), NOW())
         `;
         const values = [name, email, subject, message];
         const [result] = await pool.query(query, values);
@@ -101,8 +101,8 @@ router.post('/', validateContact, async (req, res) => {
         });
         return successResponse(res, {
             contact: newContact,
-            info: 'Confirmation email will be sent shortly'
-        }, 'Contact message new successfully', 201);
+            info: 'Contact message received successfully'
+        }, 'Contact message submitted successfully', 201);
     } catch (error) {
         console.error('Error creating contact:', error);
         return errorResponse(res, 'Failed to submit contact message', 500);
@@ -251,19 +251,19 @@ router.patch('/bulk/status', async (req, res) => {
             });
         }
 
-        const placeholders = ids.map((_, index) => `$${index + 1}`).join(',');
+        const placeholders = ids.map(() => '?').join(',');
         const params = [...ids, status, response_message || null];
 
         const result = await pool.query(
             `UPDATE contacts SET 
-                status = $${ids.length + 1}, 
-                response_message = $${ids.length + 2}, 
+                status = ?, 
+                response_message = ?, 
                 updated_at = NOW()
-            WHERE id IN (${placeholders}) RETURNING *`,
+            WHERE id IN (${placeholders})`,
             params
         );
 
-        return bulkOperationResponse(res, 'updated', result.rows, ids.length);
+        return bulkOperationResponse(res, 'updated', [], ids.length);
 
     } catch (error) {
         console.error('Error bulk updating contacts:', error);
@@ -283,16 +283,16 @@ router.delete('/bulk', async (req, res) => {
             });
         }
 
-        const placeholders = ids.map((_, index) => `$${index + 1}`).join(',');
+        const placeholders = ids.map(() => '?').join(',');
         
         const result = await pool.query(
-            `DELETE FROM contacts WHERE id IN (${placeholders}) RETURNING *`,
+            `DELETE FROM contacts WHERE id IN (${placeholders})`,
             ids
         );
 
         res.json({
-            message: `${result.rows.length} contacts deleted successfully`,
-            deleted: result.rows,
+            message: `${result.affectedRows} contacts deleted successfully`,
+            deleted: [],
             timestamp: new Date().toISOString()
         });
 

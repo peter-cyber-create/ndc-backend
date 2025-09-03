@@ -59,10 +59,12 @@ router.post('/', async (req, res) => {
         website,
         industry,
         special_requirements,
-        package_type,
+        selected_package,
+        company_description,
+        message,
         status,
         created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'submitted', NOW())`;
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'submitted', NOW())`;
 
     const [result] = await pool.query(insertQuery, [
       companyName,
@@ -72,29 +74,12 @@ router.post('/', async (req, res) => {
       website || null,
       industry || null,
       specialRequirements || null,
-      dbPackageType
+      dbPackageType,
+      `Company: ${companyName}, Contact: ${contactPerson}, Industry: ${industry || 'Not specified'}`,
+      specialRequirements || 'No special requirements'
     ]);
 
-    // Create form submission record for admin review
-    await pool.query(`
-      INSERT INTO form_submissions (
-        form_type, entity_id, submitted_by, submission_data, status, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, 'pending', NOW(), NOW())
-    `, [
-      'sponsorship',
-      result.insertId,
-      `${companyName} - ${contactPerson}`,
-      JSON.stringify({
-        companyName,
-        contactPerson,
-        email,
-        phone,
-        website,
-        industry,
-        specialRequirements,
-        selectedPackage
-      })
-    ]);
+    // Form submission record is not needed - data is already in sponsorships table
 
     // Fetch the inserted row
     const [rows] = await pool.query('SELECT * FROM sponsorships WHERE id = ?', [result.insertId]);

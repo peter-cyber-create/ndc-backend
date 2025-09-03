@@ -1,46 +1,67 @@
-# dependencies
+# Dependencies
 /node_modules
 /.pnp
 .pnp.js
 
-# testing
+# Testing
 /coverage
 
-# production
+# Next.js
+/.next/
+/out/
+
+# Production
 /build
-/dist
 
-# environment files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Misc
+.DS_Store
+*.pem
 
-# logs
+# Debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pm2.log
 
-# OS files
-.DS_Store
-Thumbs.db
+# Local env files
+.env*.local
 
-# IDE files
-.vscode/
-.idea/
+# Vercel
+.vercel
 
-# Temporary files
-*.tmp
-*.temp
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
 
-# Don't include Next.js files in Express backend
-app/
-pages/
-next.config.js
-.next/
+# Build outputs
+dist/
 
-# Backend specific ignores
+# Large files and archives
+*.tar.gz
+*.tar
+*.zip
+*.rar
+*.7z
+*.log
+*.log.*
+
+# Upload directories
+public/uploads/
 uploads/
-logs/
+
+# Large media files (optional - uncomment if you want to ignore large images)
+# *.jpg
+# *.jpeg
+# *.png
+# *.gif
+# *.pdf
+# *.mp4
+# *.mov
+# *.avi
+
+# Specific large files that should never be committed
+ntlp-frontend.tar.gz
+frontend.log
+frontend_new.log
+
+# Node modules (redundant but explicit)
+/node_modules

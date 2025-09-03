@@ -233,7 +233,7 @@ router.post('/', async (req, res) => {
     const country = req.body.country;
     const registrationType = req.body.registrationType;
     const specialRequirements = req.body.specialRequirements;
-    const dietary_requirements = req.body.dietary_requirements;
+    const special_requirements = req.body.special_requirements;
     const paymentProofUrl = req.body.paymentProofUrl;
 
     // Map frontend fields to DB columns
@@ -246,8 +246,7 @@ router.post('/', async (req, res) => {
       position: position || null,
       country: country || null,
       registrationType: registrationType,
-      dietary_requirements: dietary_requirements || null,
-      special_needs: specialRequirements || null
+      special_requirements: special_requirements || specialRequirements || null
     };
 
     // Validate required fields
@@ -273,8 +272,8 @@ router.post('/', async (req, res) => {
     const insertQuery = `
       INSERT INTO registrations (
         first_name, last_name, email, organization, phone, position, country, 
-        registrationType, dietary_requirements, special_needs, payment_reference, payment_status, status, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW(), NOW())
+        registration_type, special_requirements, payment_proof_url, status, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'submitted', NOW(), NOW())
     `;
     
     const [result] = await pool.query(insertQuery, [
@@ -286,23 +285,11 @@ router.post('/', async (req, res) => {
       dbData.position,
       dbData.country,
       dbData.registrationType,
-      dbData.dietary_requirements,
-      dbData.special_needs,
-      paymentProofUrl || null,
-      'pending'
+      dbData.special_requirements,
+      paymentProofUrl || null
     ]);
 
-    // Create form submission record
-    await pool.query(`
-      INSERT INTO form_submissions (
-        form_type, entity_id, submitted_by, submission_data, status, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, 'pending', NOW(), NOW())
-    `, [
-      'registration',
-      result.insertId,
-      dbData.email,
-      JSON.stringify(req.body)
-    ]);
+    // Form submission record is not needed - data is already in registrations table
 
     // Fetch the inserted registration
     const [rows] = await pool.query('SELECT * FROM registrations WHERE id = ?', [result.insertId]);
@@ -587,7 +574,7 @@ router.put('/:id', async (req, res) => {
       organization, 
       position, 
       registrationType,
-      dietary_requirements,
+      special_requirements,
       specialRequirements
     } = req.body;
     
@@ -601,15 +588,14 @@ router.put('/:id', async (req, res) => {
     // Update registration
     await pool.query(
       `UPDATE registrations SET 
-        firstName = ?, 
-        lastName = ?, 
+        first_name = ?, 
+        last_name = ?, 
         email = ?, 
         phone = ?, 
         organization = ?, 
         position = ?, 
-        registrationType = ?,
-        dietary_requirements = ?,
-        specialRequirements = ?,
+        registration_type = ?,
+        special_requirements = ?,
         updated_at = CURRENT_TIMESTAMP 
       WHERE id = ?`,
       [
@@ -620,8 +606,7 @@ router.put('/:id', async (req, res) => {
         organization,
         position,
         registrationType,
-        dietary_requirements,
-        specialRequirements,
+        special_requirements,
         id
       ]
     );
